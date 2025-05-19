@@ -1,5 +1,4 @@
 // src/pages/createServiceSteps/Step2_HardwareStagesForm.tsx
-import React from 'react';
 import { useCreateServiceContext } from '@/pages/CreateServicePage'; // Adjust path
 import { LifecycleStageInput } from '@/components/form/LifecycleStageInput'; // Adjust path
 import type { LifecycleStageKey, ImpactConfig } from '@/types/aiService';

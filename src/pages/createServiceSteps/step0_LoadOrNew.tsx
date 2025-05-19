@@ -2,8 +2,6 @@
 import React, { useRef } from 'react';
 import { useCreateServiceContext } from '@/pages/CreateServicePage'; // Adjust path if needed
 import { Button } from '@/components/ui/button';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
 import type { AIServiceLifecycleImpact } from '@/types/aiService';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 

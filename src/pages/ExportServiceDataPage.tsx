@@ -11,19 +11,6 @@ import Papa from 'papaparse'; // For CSV generation
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-// Helper to get CO2 value (similar to VisualizePage, but no dynamic simulation needed for static export)
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const getStaticCO2Value = (config: ImpactConfig): number | string => {
-    if (config.impactCalculationMode === 'approximation') {
-        return (config as ApproximationConfig).co2EqInKg;
-    }
-    if (config.impactCalculationMode === 'dynamic') {
-        // For CSV export, we might represent dynamic as a placeholder or specific text
-        return 'Dynamic (API)'; // Or return 0, or try to fetch if an API call were implemented
-    }
-    return 0; // For 'none' or unhandled
-};
-
 interface CsvRow {
     serviceId: string;
     serviceName: string;
