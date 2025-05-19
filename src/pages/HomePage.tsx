@@ -19,8 +19,8 @@ export function HomePage() {
       {/* Application Description */}
       <p className="max-w-3xl text-lg sm:text-xl text-muted-foreground mb-10 md:mb-12 leading-relaxed">
         The CGASSEF tool is designed to help organizations assess the environmental impact of Generative AI applications
-        across their life cycle. It provides intuitive dashboards, customizable metrics, and scenario simulations
-        to visualize energy use, CO₂ emissions, and ESG factors—making sustainability insights accessible for
+        across their life cycle. It provides intuitive dashboards and metrics 
+        to make AI service sustainability insights accessible for
         technical and non-technical stakeholders alike.
       </p>
 
