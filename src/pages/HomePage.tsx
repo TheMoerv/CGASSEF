@@ -1,8 +1,4 @@
 // src/pages/HomePage.tsx
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
-
 // Import the image from the assets folder
 import heroImageSrc from '@/assets/cgsaem_visualization.png'; // Using path alias for src
 
@@ -36,6 +32,7 @@ export function HomePage() {
           className="w-full h-auto object-contain"
         />
       </div>
+
     </div>
   );
 }
