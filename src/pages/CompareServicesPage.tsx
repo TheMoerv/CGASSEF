@@ -276,7 +276,7 @@ export function CompareServicesPage() {
             </Label>
             <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-4">
               <Button onClick={() => multiFileInputRef.current?.click()} variant="outline" size="lg">
-                <UploadCloud className="mr-2 h-5 w-5" /> Select Files
+                <UploadCloud className="mr-2 h-5 w-5" /> Upload Impact Data Files
               </Button>
               <input type="file" accept=".json" ref={multiFileInputRef} multiple onChange={handleFilesChange} className="hidden" id="multi-file-input"/>
             </div>
@@ -305,6 +305,9 @@ export function CompareServicesPage() {
           {uploadedServices.length > 0 && (
             <div className="space-y-6 pt-2"> {/* Removed border-t as previous section now has border-b */}
               <h3 className="text-xl font-semibold">Configuration Parameters</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+              Adjust the total number of inference requests for each service. This count is used to calculate 'per inference' metrics and can influence the overall impact scores.
+              </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {uploadedServices.map(service => (
                   <div key={service.serviceId} className="space-y-1.5">
@@ -332,7 +335,7 @@ export function CompareServicesPage() {
           <CardHeader className="items-center pb-2">
             <CardTitle className="text-2xl">Service Comparison Radar</CardTitle>
             <CardDescription className="text-center text-muted-foreground pt-1">
-              Normalized view of services. Larger values are further from the center. Tooltips show original values.
+               This radar chart provides a normalized comparison of the selected AI services across key sustainability dimensions. For each dimension, a service's value is scaled relative to the maximum observed value among all compared services for that dimension (0-100%). A larger area or points further from the center indicate a relatively higher impact or count in that specific dimension. Hover over points for actual values.
             </CardDescription>
           </CardHeader>
           <CardContent className="pb-4 min-h-[450px] sm:min-h-[550px] md:min-h-[600px]">

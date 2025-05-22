@@ -40,16 +40,16 @@ export function AppLayout() {
           </Link>
           <nav className="flex items-center gap-1 sm:gap-2 md:gap-3"> {/* Adjusted gaps for responsiveness */}
             <Link to="/create">
-              <Button variant="ghost" className="px-2 sm:px-3 text-xs sm:text-sm">Create/Edit</Button>
+              <Button variant="ghost" className="px-2 sm:px-3 text-xs sm:text-sm">Enter / Edit AI-related inputs</Button>
             </Link>
             <Link to="/visualize">
-              <Button variant="ghost" className="px-2 sm:px-3 text-xs sm:text-sm">Visualize</Button>
+              <Button variant="ghost" className="px-2 sm:px-3 text-xs sm:text-sm">Visualize Impact of AI Service </Button>
             </Link>
             <Link to="/compare">
-              <Button variant="ghost" className="px-2 sm:px-3 text-xs sm:text-sm">Compare</Button>
+              <Button variant="ghost" className="px-2 sm:px-3 text-xs sm:text-sm">Compare Impacts of AI Services</Button>
             </Link>
             <Link to="/export">
-              <Button variant="ghost" className="px-2 sm:px-3 text-xs sm:text-sm">Export Data</Button>
+              <Button variant="ghost" className="px-2 sm:px-3 text-xs sm:text-sm">Export Impact Data</Button>
             </Link>
             <Button
               variant="outline"

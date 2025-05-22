@@ -146,7 +146,7 @@ export function ExportServiceDataPage() {
           <CardHeader>
             <CardTitle>Export Options for: <span className="text-primary font-semibold">{serviceData.name}</span></CardTitle>
             <CardDescription>
-              The data will be exported in CSV format. Each row will represent a lifecycle stage.
+              The data will be exported in CSV format. Each row will represent the CO2 impact of a dedicated lifecycle stage of the AI service.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">

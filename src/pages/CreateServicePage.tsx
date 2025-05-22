@@ -151,7 +151,11 @@ function CreateServiceWizard() {
 
             {/* Render Step 0: Load or New */}
             {state.currentStep === 0 && (
-                <div className="flex justify-center"> {/* Centering the card */}
+                <div className="flex flex-col items-center space-y-6">
+                    <p className="max-w-xl text-center text-muted-foreground">
+                        Begin by loading an existing AI service configuration file (provided as .json file format) to modify its details,
+                        or start fresh to define a new service and its environmental impact profile from scratch.
+                    </p>
                     <Step0_LoadOrNew />
                 </div>
             )}
@@ -220,7 +224,7 @@ function CreateServiceWizard() {
                                 dispatch({ type: 'SET_STEP', payload: 4 });
                             }}
                         >
-                            Next: Export
+                            Next: Save Impact Data
                         </Button>
                     )}
                     {/* No "Next" button on Step 4 (Export View) unless you add a "Finish" or "New" button there */}

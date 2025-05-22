@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { AIServiceLifecycleImpact, LifecycleStageKey, ImpactConfig, ApproximationConfig } from '@/types/aiService';
 import { lifecycleStageKeys } from '@/types/aiService';
-import { STAGE_LABELS } from '@/constants/lifecycleStages';
+import { STAGE_LABELS, SOFTWARE_STAGE_DESCRIPTIONS, HARDWARE_STAGE_DESCRIPTIONS } from '@/constants/lifecycleStages';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -25,6 +25,12 @@ import {
   ChartLegendContent,
   type ChartConfig
 } from "@/components/ui/chart";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 // Helper for CO2 value extraction
 const getCO2Value = (
@@ -224,13 +230,13 @@ export function VisualizeServicePage() {
       <Card className="shadow-lg">
         <CardHeader>
           <CardTitle className="text-2xl">AI Service CO₂ Dashboard</CardTitle>
-          <CardDescription>Upload your AI Service JSON to visualize its CO₂ impact.</CardDescription>
+          <CardDescription>Upload your AI Service JSON file to see a visual breakdown of its estimated CO₂ emissions across different lifecycle phases.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col items-center gap-4">
             <input type="file" accept=".json" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
             <Button onClick={handleUploadClick} size="lg" className="w-full sm:w-auto">
-              <UploadCloud className="mr-2 h-5 w-5" /> Upload Service JSON
+              <UploadCloud className="mr-2 h-5 w-5" /> Upload Impact Data File
             </Button>
             {error && ( <Alert variant="destructive" className="w-full"> <Info className="h-4 w-4" /> <AlertTitle>Error Loading File</AlertTitle> <AlertDescription>{error}</AlertDescription> </Alert> )}
           </div>
@@ -242,6 +248,7 @@ export function VisualizeServicePage() {
           <CardHeader>
             <CardTitle>CO₂ Impact Overview: <span className="font-semibold text-primary">{serviceData.name}</span></CardTitle>
             <CardDescription>Total Estimated CO₂ Emissions: <span className="font-bold">{totalCO2.toFixed(2)} kg CO₂e</span></CardDescription>
+            <p className="text-xs text-muted-foreground mt-1">This total represents the sum of CO₂ equivalents (kg CO₂e) from all active lifecycle stages defined in your configuration.</p>
           </CardHeader>
         </Card>
       )}
@@ -264,6 +271,9 @@ export function VisualizeServicePage() {
                   </PieChart>
                 </ChartContainer>
               </CardContent>
+              <CardDescription className="text-center text-xs sm:text-sm text-muted-foreground px-2 pb-2">
+              This chart shows the percentage contribution of each lifecycle stage to the total CO₂ emissions. Stages with larger slices have a higher relative impact. Colors transition from green (lower impact) to red (higher impact).
+            </CardDescription>
             </Card>
           )}
 
@@ -283,6 +293,9 @@ export function VisualizeServicePage() {
                   </PieChart>
                 </ChartContainer>
               </CardContent>
+              <CardDescription className="text-center text-xs sm:text-sm text-muted-foreground px-2 pb-2">
+              Compares the CO₂ impact from ongoing software operations versus the impact from the AI system's hardware (materials, manufacturing, transport, installation).
+            </CardDescription>
             </Card>
           )}
 
@@ -318,19 +331,57 @@ export function VisualizeServicePage() {
                   </BarChart>
                 </ChartContainer>
               </CardContent>
+              <CardDescription className="text-left text-xs sm:text-sm text-muted-foreground px-2 pb-2">
+  This chart displays the absolute CO₂ emissions (in kg CO₂e) for each lifecycle stage. Longer bars indicate higher emissions for that specific stage. Colors correspond to the detailed pie chart.
+</CardDescription>
             </Card>
           )}
         </div>
       )}
 
-      {serviceData && detailedStageData.length === 0 && opVsEmbChartData.length === 0 && !error && (
-        <Alert variant="default" className="mt-4 shadow-lg">
-            <Info className="h-4 w-4" />
-            <AlertTitle>No CO₂ Data to Display</AlertTitle>
-            <AlertDescription>
-                The uploaded configuration has no lifecycle stages with CO₂ impact greater than zero.
-            </AlertDescription>
-        </Alert>
+      {serviceData && ( /* Only show if data is loaded, so stage keys are relevant */
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-xl">Understanding Lifecycle Stages</CardTitle>
+            <CardDescription>
+              The AI service lifecycle is broken down into operational (software-related) and embodied (hardware-related) emission phases.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="operational-emissions">
+                <AccordionTrigger className="text-lg font-semibold text-primary">Operational Emissions (Software Lifecycle)</AccordionTrigger>
+                <AccordionContent className="space-y-3 pt-3">
+                  {softwareCycleKeys.map((stageKey) => {
+                    const label = STAGE_LABELS[stageKey];
+                    const description = SOFTWARE_STAGE_DESCRIPTIONS[stageKey];
+                    return (
+                      <div key={stageKey}>
+                        <h4 className="font-medium">{label || stageKey}</h4>
+                        {description && <p className="text-sm text-muted-foreground pl-2">{description}</p>}
+                      </div>
+                    );
+                  })}
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="embodied-emissions">
+                <AccordionTrigger className="text-lg font-semibold text-primary">Embodied Emissions (Hardware Lifecycle)</AccordionTrigger>
+                <AccordionContent className="space-y-3 pt-3">
+                  {hardwareCycleKeys.map((stageKey) => {
+                    const label = STAGE_LABELS[stageKey];
+                    const description = HARDWARE_STAGE_DESCRIPTIONS[stageKey];
+                    return (
+                      <div key={stageKey}>
+                        <h4 className="font-medium">{label || stageKey}</h4>
+                        {description && <p className="text-sm text-muted-foreground pl-2">{description}</p>}
+                      </div>
+                    );
+                  })}
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </CardContent>
+        </Card>
       )}
     </div>
   );

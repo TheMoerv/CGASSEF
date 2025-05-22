@@ -60,7 +60,7 @@ export function Step4_ExportView() {
       <CardHeader>
         <CardTitle>Export Configuration</CardTitle>
         <CardDescription>
-          Review your AI service lifecycle impact configuration and download it as a JSON file.
+          Review your complete AI service lifecycle impact configuration and download it as a JSON file for follow-up visualizations and AI Service comparisons.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">

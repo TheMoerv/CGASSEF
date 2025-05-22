@@ -230,7 +230,7 @@ export function VisualizeServicePage() {
           <div className="flex flex-col items-center gap-4">
             <input type="file" accept=".json" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
             <Button onClick={handleUploadClick} size="lg" className="w-full sm:w-auto">
-              <UploadCloud className="mr-2 h-5 w-5" /> Upload Service JSON
+              <UploadCloud className="mr-2 h-5 w-5" /> Upload JSON file containing AI service impact data
             </Button>
             {error && ( <Alert variant="destructive" className="w-full"> <Info className="h-4 w-4" /> <AlertTitle>Error Loading File</AlertTitle> <AlertDescription>{error}</AlertDescription> </Alert> )}
           </div>

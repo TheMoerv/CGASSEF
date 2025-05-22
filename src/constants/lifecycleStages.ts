@@ -19,12 +19,12 @@ export const STAGE_LABELS: Record<LifecycleStageKey, string> = {
 };
 
 export const SOFTWARE_STAGE_DESCRIPTIONS: Partial<Record<LifecycleStageKey, string>> = {
-    businessUseCaseGeneration: "CO₂ emissions from initial computational analyses and prototyping used to define business requirements.",
+    businessUseCaseGeneration: "CO₂ emissions from activties of clariying / detailing business requirements for promising AI services (e.g. Total emitted CO2 for video-conferencing meetings) ",
     dataHandling: "Emissions from data ingestion, cleaning, transformation, and storage operations.",
-    modelArchitectureExploration: "CO₂ impact from running multiple experiments to compare and validate model architectures.",
-    modelTraining: "High emissions due to GPU/CPU usage during full-scale training and periodic retraining.",
-    modelOperation: "Energy consumption and associated CO₂ from both idle and inference workloads during deployment.", // Note 'modelOperation' vs 'modelOperation (Inference)'
-    modelEndOfLife: "Emissions from monitoring, archiving, and decommissioning model infrastructure and resources."
+    modelArchitectureExploration: "CO₂ impact from running multiple experiments (pre-training run)s to compare and validate model architectures.",
+    modelTraining: "Emissions due to GPU/CPU usage during full-scale training and periodic retraining.",
+    modelOperation: "Associated emitted CO₂ from both idle and inference workloads during deployment, use and monitoring of an AI service.", // Note 'modelOperation' vs 'modelOperation (Inference)'
+    modelEndOfLife: "Emissions from archiving, and decommissioning model infrastructure and resources."
 };
 
 export const HARDWARE_STAGE_DESCRIPTIONS: Partial<Record<LifecycleStageKey, string>> = {
