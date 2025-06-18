@@ -1,8 +1,14 @@
-// src/pages/CompareServicesPage.tsx
+/**
+ * @file src/pages/CompareServicesPage.tsx
+ * @description Implements the "Compare Impacts of AI Services" core function of the CGASSEF prototype.
+ * This page enables users to upload multiple AI service JSON files, configure parameters like
+ * inference counts, and generate a comparative radar chart. The chart visualizes the relative
+ * sustainability performance of each service across several key metrics.
+ * @author Marwin Ahnfeldt
+ */
+
 import React, { useState, useRef, useEffect } from 'react';
 import type { AIServiceLifecycleImpact, LifecycleStageKey } from '@/types/aiService';
-// Assuming lifecycleStageKeys is still needed if calculateStaticCO2 or other helpers use it broadly.
-// If not directly used in this file after refactoring, it can be removed from here.
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -19,10 +25,11 @@ import {
 import {
   ChartContainer,
   ChartTooltip,
-  // ChartLegend, // Not using legend for radar in this version
-  // ChartLegendContent,
 } from "@/components/ui/chart";
 import type { ChartConfig } from '@/components/ui/chart';
+
+// --- Constants and Type Definitions ---
+
 
 // Define keys for different impact categories
 const softwareCycleKeys: LifecycleStageKey[] = [
@@ -38,10 +45,13 @@ interface ComparisonFormState {
 }
 const DEFAULT_INFERENCE_COUNT = 1000;
 
+//Data structure required by Recharts for each point on the radar charts axes
 interface RadarDataPoint {
   dimension: string;
-  [serviceId: string]: number | string; // serviceId will be the key, value is the metric
+  [serviceId: string]: number | string; 
 }
+
+// A processed data structure holding all calculated metrics for a single service. */
 
 interface ServiceRadarMetrics {
     serviceId: string;
@@ -56,6 +66,7 @@ interface ServiceRadarMetrics {
     totalImpact: number;
 }
 
+// Helper function to extract the static CO₂ value from a service's approximation data
 const calculateStaticCO2 = (service: AIServiceLifecycleImpact, stageKey: LifecycleStageKey): number => {
   const config = service.cycleStages[stageKey];
   if (config && config.impactCalculationMode === 'approximation') {
@@ -64,6 +75,7 @@ const calculateStaticCO2 = (service: AIServiceLifecycleImpact, stageKey: Lifecyc
   return 0;
 };
 
+// Defines the dimensions of the radar chart, their labels, and units. 
 const radarDimensions = [
     { key: 'inferenceCount', label: 'Inference Count', unit: 'reqs' },
     { key: 'avgEmbodiedPerInference', label: 'Avg. Embodied / Inf.', unit: 'kg/req' },
@@ -76,23 +88,32 @@ const radarDimensions = [
 
 type RadarDimensionKey = typeof radarDimensions[number]['key'];
 
+/**
+ * The `CompareServicesPage` component, orchestrating the entire comparison workflow
+ */
 export function CompareServicesPage() {
   const [uploadedServices, setUploadedServices] = useState<AIServiceLifecycleImpact[]>([]);
   const [error, setError] = useState<string | null>(null);
   const multiFileInputRef = useRef<HTMLInputElement>(null);
   const [formState, setFormState] = useState<ComparisonFormState>({ inferenceCounts: {} });
 
-  // State for calculated metrics (updated by useEffect)
+  // --- Two-Stage State Update for Chart Data ---
+  // This pattern improves performance and UX by separating real-time calculations from final display rendering
+  // 1. 'Calculated' states: Updated automatically by a `useEffect` hook whenever inputs change
   const [calculatedPerServiceMetrics, setCalculatedPerServiceMetrics] = useState<ServiceRadarMetrics[]>([]);
   const [calculatedRadarChartData, setCalculatedRadarChartData] = useState<RadarDataPoint[]>([]);
   const [calculatedRadarChartConfig, setCalculatedRadarChartConfig] = useState<ChartConfig>({});
 
-  // State for metrics to be displayed by the chart (updated by button click)
+  // 2. 'Display' states: Updated only when the user explicitly clicks the "Generate Chart" button.
+  // This prevents the chart from re-rendering on every mouse click.
   const [displayPerServiceMetrics, setDisplayPerServiceMetrics] = useState<ServiceRadarMetrics[]>([]);
   const [displayRadarChartData, setDisplayRadarChartData] = useState<RadarDataPoint[]>([]);
   const [displayRadarChartConfig, setDisplayRadarChartConfig] = useState<ChartConfig>({});
   const [isChartGenerated, setIsChartGenerated] = useState(false);
 
+  // --- Event Handlers ---
+
+  // Handles multiple file uploads, parsing them and updating the list of services
   const handleFilesChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     setError(null);
@@ -129,6 +150,7 @@ export function CompareServicesPage() {
     }
   };
 
+  // Removes a service from the comparison
   const handleRemoveService = (serviceIdToRemove: string) => {
     setUploadedServices(prev => prev.filter(s => s.serviceId !== serviceIdToRemove));
     setFormState(prev => {
@@ -138,7 +160,7 @@ export function CompareServicesPage() {
     });
     setIsChartGenerated(false);
   };
-
+  // Updates the inference count for a service and invalidates the current chart
   const handleInferenceCountChange = (serviceId: string, value: string) => {
     const count = parseInt(value, 10);
     setFormState(prev => ({
@@ -148,19 +170,26 @@ export function CompareServicesPage() {
     setIsChartGenerated(false); // Require regeneration if counts change
   };
 
+  /**
+   * This effect is the core calculation engine. It runs whenever the list of services or their
+   * inference counts change. It performs a three-step process to prepare the data:
+   * 1. Calculates the absolute metrics for each service (e.g., total impact, avg per inference).
+   * 2. Finds the maximum value for each metric across all services for normalization.
+   * 3. Transforms the data into a normalized (0-100) format suitable for the radar chart.
+   */
   useEffect(() => {
+    // Clear all states if no services are loaded
     if (uploadedServices.length === 0) {
       setCalculatedRadarChartData([]);
       setCalculatedRadarChartConfig({});
       setCalculatedPerServiceMetrics([]);
-      // Also clear display states and hide chart
       setDisplayRadarChartData([]);
       setDisplayRadarChartConfig({});
       setDisplayPerServiceMetrics([]);
       setIsChartGenerated(false);
       return;
     }
-
+    // Step 1: Calculate absolute metrics for each service
     const newPerServiceMetrics: ServiceRadarMetrics[] = uploadedServices.map((service, index) => {
       const totalRequests = formState.inferenceCounts[service.serviceId] || DEFAULT_INFERENCE_COUNT;
       let embodiedImpact = 0;
@@ -180,6 +209,7 @@ export function CompareServicesPage() {
     });
     setCalculatedPerServiceMetrics(newPerServiceMetrics);
 
+    // Step 2: Find the maximum value for each dimension across all services
     const maxValuesPerDimension: Partial<Record<RadarDimensionKey, number>> = {};
     radarDimensions.forEach(dim => {
       let maxVal = 0;
@@ -190,6 +220,7 @@ export function CompareServicesPage() {
       maxValuesPerDimension[dim.key as RadarDimensionKey] = maxVal > 0 ? maxVal : 1;
     });
 
+    // Step 3: Transform and normalize the data for the radar chart
     const transformedData: RadarDataPoint[] = radarDimensions.map(dim => {
       const dataPoint: RadarDataPoint = { dimension: dim.label };
       const dimensionMax = maxValuesPerDimension[dim.key as RadarDimensionKey] || 1;
@@ -206,7 +237,7 @@ export function CompareServicesPage() {
     setCalculatedRadarChartConfig(newChartConfig);
 
   }, [uploadedServices, formState.inferenceCounts]);
-
+  // "Commits" the calculated data to the display state, making the chart visible
   const handleGenerateChart = () => {
     setDisplayPerServiceMetrics(calculatedPerServiceMetrics);
     setDisplayRadarChartData(calculatedRadarChartData);
@@ -214,6 +245,9 @@ export function CompareServicesPage() {
     setIsChartGenerated(true);
   };
 
+  // --- Rendering & UI ---
+
+  // Custom tooltip for the radar chart to show original, non-normalized values
   const RadarCustomTooltip = (props: TooltipProps<number, string>) => {
     const { active, payload, label: dimensionLabelFromAxis } = props;
     if (active && payload && payload.length) {
@@ -263,6 +297,7 @@ export function CompareServicesPage() {
   return (
     <div className="container mx-auto py-12 px-4 space-y-10">
       <Card className="shadow-xl border-border/60">
+      {/* --- Configuration Card --- */}
         <CardHeader className="pb-4">
           <CardTitle className="text-3xl font-bold tracking-tight text-center">Compare AI Services - Radar Chart</CardTitle>
           <CardDescription className="text-center text-muted-foreground pt-1">
@@ -329,7 +364,8 @@ export function CompareServicesPage() {
           {error && ( <Alert variant="destructive" className="mt-6"> <Info className="h-4 w-4" /> <AlertTitle>Error Occurred</AlertTitle> <AlertDescription>{error}</AlertDescription> </Alert> )}
         </CardContent>
       </Card>
-
+      
+      {/* --- Chart Display Card (conditionally rendered) --- */}
       {isChartGenerated && displayPerServiceMetrics.length > 0 && displayRadarChartData.length > 0 && (
         <Card className="shadow-xl border-border/60">
           <CardHeader className="items-center pb-2">
@@ -358,7 +394,7 @@ export function CompareServicesPage() {
           </CardContent>
         </Card>
       )}
-
+      {/* --- Metrics Explanation Card --- */}
       <Card className="shadow-xl border-border/60">
         <CardHeader> <CardTitle className="text-xl">Understanding the Comparison Metrics</CardTitle> </CardHeader>
         <CardContent className="space-y-4 text-sm">
@@ -374,6 +410,7 @@ export function CompareServicesPage() {
   );
 }
 
+// Helper function to provide descriptions for each radar dimension
 function getDimensionDescription(key: RadarDimensionKey, unit: string): string {
     switch (key) {
         case 'inferenceCount':

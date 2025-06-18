@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "serviceId": "3",
+  "name": "PowerPoint Image Generator",
+  "description": "",
+  "cycleStages": {
+    "businessUseCaseGeneration": {
+      "impactCalculationMode": "approximation",
+      "co2EqInKg": 56.0
+    },
+    "dataHandling": {
+      "impactCalculationMode": "approximation",
+      "co2EqInKg": 33.0
+    },
+    "modelArchitectureExploration": {
+      "impactCalculationMode": "approximation",
+      "co2EqInKg": 600.0
+    },
+    "modelTraining": {
+      "impactCalculationMode": "approximation",
+      "co2EqInKg": 470.0
+    },
+    "modelOperation": {
+      "impactCalculationMode": "approximation",
+      "co2EqInKg": 3700.0
+    },
+    "modelEndOfLife": {
+      "impactCalculationMode": "none"
+    },
+    "materialExtraction": {
+      "impactCalculationMode": "approximation",
+      "co2EqInKg": 82.0
+    },
+    "hardwareManufacturing": {
+      "impactCalculationMode": "approximation",
+      "co2EqInKg": 240.0
+    },
+    "hardwareTransport": {
+      "impactCalculationMode": "approximation",
+      "co2EqInKg": 20.0
+    },
+    "AISystemInstallation": {
+      "impactCalculationMode": "approximation",
+      "co2EqInKg": 12.0
+    }
+  }
+}

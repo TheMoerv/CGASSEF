@@ -1,0 +1,45 @@
+{
+  "$schema": "https://example.com/schemas/cgsaem.schema.json",
+  "serviceId": "16",
+  "name": "FAQ Chatbot",
+  "description": "Customer-facing FAQ chatbot answering basic customer questions regarding product and service related issues",
+  "cycleStages": {
+    "businessUseCaseGeneration": {
+      "impactCalculationMode": "none"
+    },
+    "dataHandling": {
+      "impactCalculationMode": "approximation",
+      "co2EqInKg": 110
+    },
+    "modelArchitectureExploration": {
+      "impactCalculationMode": "approximation",
+      "co2EqInKg": 45
+    },
+    "modelTraining": {
+      "impactCalculationMode": "approximation",
+      "co2EqInKg": 900
+    },
+    "modelOperation": {
+      "impactCalculationMode": "approximation",
+      "co2EqInKg": 2700
+    },
+    "modelEndOfLife": {
+      "impactCalculationMode": "approximation",
+      "co2EqInKg": 0
+    },
+    "materialExtraction": {
+      "impactCalculationMode": "none"
+    },
+    "hardwareManufacturing": {
+      "impactCalculationMode": "approximation",
+      "co2EqInKg": 130
+    },
+    "hardwareTransport": {
+      "impactCalculationMode": "approximation",
+      "co2EqInKg": 18
+    },
+    "AISystemInstallation": {
+      "impactCalculationMode": "none"
+    }
+  }
+}

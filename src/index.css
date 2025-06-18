@@ -6,10 +6,9 @@
 @tailwind utilities;
 
 :root {
-  /* font-family can be moved to tailwind.config.js for a cleaner approach */
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5; /* Or rely on Tailwind's base and utilities */
-  font-weight: 400; /* Or rely on Tailwind's base and utilities */
+  line-height: 1.5; 
+  font-weight: 400; 
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -18,9 +17,6 @@
 }
 
 body {
-  /* Tailwind's Preflight (from @tailwind base) handles margin: 0; */
-  /* Tailwind's Preflight also sets a default background color,
-     which will be overridden by bg-background on your main layout/body if using Shadcn */
   min-width: 320px;
   min-height: 100vh;
 }

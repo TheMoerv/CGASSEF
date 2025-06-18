@@ -1,13 +1,28 @@
-// src/pages/HomePage.tsx
+/**
+ * @file HomePage.tsx
+ * @description Implements the main landing page for the CGASSEF web prototype.
+ * This page serves as the initial entry point for users, providing a high-level
+ * overview of the tool's purpose and its key features. 
+ * @author Marwin Ahnfeldt
+ */
 
-// Import the image from the assets folder
-import heroImageSrc from '@/assets/cgsaem_visualization.png'; // Using path alias for src
+// Import the representative image from the assets folder.
+import heroImageSrc from '@/assets/cgsaem_visualization.png'; 
+// Import a UI icon for visual enhancement of the features list.
 import { CheckCircle } from 'lucide-react'; // For bullet point icons
 
+
+/**
+ * The HomePage component renders the static content for the application's landing page. It is a purely presentational component that 
+ * does not handle state or business logic. Its primary role is to welcome the user and outline the four main functions of the
+ * CGASSEF tool: Enter/Edit AI-related inputs, Visualize Impact of AI Service, Compare Impacts of AI Service, and Export Impact data.
+ *
+ * @returns {JSX.Element} The rendered home page view, which is the main entry point of the application.
+ */
 export function HomePage() {
   return (
     <div className="container mx-auto py-12 px-4 flex flex-col items-center text-center">
-      {/* Application Header */}
+      {/* First section - Application Header */}
       <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-primary mb-3">
         CGASSEF
       </h1>
@@ -15,7 +30,7 @@ export function HomePage() {
         Comprehensive (Generative) AI Service Sustainability Assessment Framework
       </h2>
       
-      {/* Image Display - Moved up for better visual flow */}
+      {/* Second section - Visual representation */}
       <div className="w-full max-w-2xl lg:max-w-3xl mb-10 md:mb-12 shadow-2xl rounded-lg overflow-hidden border-2 border-primary/20"> {/* Enhanced styling */}
         <img
           src={heroImageSrc}
@@ -24,7 +39,7 @@ export function HomePage() {
         />
       </div>
 
-      {/* Application Description */}
+      {/* Third section - Application Description explaining the objective and value proposition of the CGASSEF tool */}
       <p className="max-w-3xl text-lg sm:text-xl text-muted-foreground mb-10 leading-relaxed">
         The CGASSEF tool is designed to help organizations assess the environmental impact of Generative AI applications
         across their life cycle. It provides intuitive dashboards and metrics 
@@ -32,7 +47,7 @@ export function HomePage() {
         technical and non-technical stakeholders alike.
       </p>
 
-      {/* Key Features Section */}
+      {/* Fourth - Section - List explaining the core functionalities of the prototype, corresponding to the navigation tab bar*/}
       <div className="w-full max-w-3xl mb-12">
         <h3 className="text-2xl sm:text-3xl font-semibold text-foreground mb-6">Key Features</h3>
         <ul className="space-y-4 text-left text-lg text-muted-foreground">

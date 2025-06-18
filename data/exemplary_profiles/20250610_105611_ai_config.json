@@ -1,0 +1,45 @@
+{
+  "$schema": "https://example.com/schemas/cgsaem.schema.json",
+  "serviceId": "15",
+  "name": "Customer Service AI Assistant",
+  "description": "Global cloud-deployed AI chatbot for customer support",
+  "cycleStages": {
+    "businessUseCaseGeneration": {
+      "impactCalculationMode": "none"
+    },
+    "dataHandling": {
+      "impactCalculationMode": "approximation",
+      "co2EqInKg": 75
+    },
+    "modelArchitectureExploration": {
+      "impactCalculationMode": "approximation",
+      "co2EqInKg": 15
+    },
+    "modelTraining": {
+      "impactCalculationMode": "approximation",
+      "co2EqInKg": 800
+    },
+    "modelOperation": {
+      "impactCalculationMode": "approximation",
+      "co2EqInKg": 1200
+    },
+    "modelEndOfLife": {
+      "impactCalculationMode": "approximation",
+      "co2EqInKg": 3
+    },
+    "materialExtraction": {
+      "impactCalculationMode": "none"
+    },
+    "hardwareManufacturing": {
+      "impactCalculationMode": "approximation",
+      "co2EqInKg": 150
+    },
+    "hardwareTransport": {
+      "impactCalculationMode": "approximation",
+      "co2EqInKg": 20
+    },
+    "AISystemInstallation": {
+      "impactCalculationMode": "none"
+    }
+  }
+}

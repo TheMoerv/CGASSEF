@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/cgassef.schema.json",
+  "$vocabulary": {
+    "https://json-schema.org/draft/2020-12/vocab/core": true,
+    "https://json-schema.org/draft/2020-12/vocab/applicator": true,
+    "https://json-schema.org/draft/2020-12/vocab/validation": true,
+    "https://json-schema.org/draft/2020-12/vocab/unevaluated": true,
+    "https://json-schema.org/draft/2020-12/vocab/meta-data": true,
+    "https://json-schema.org/draft/2020-12/vocab/format-annotation": true,
+    "https://json-schema.org/draft/2020-12/vocab/content": true
+  },
+  "$dynamicAnchor": "meta",
+  "title": "AI Service Lifecycle Impact Schema",
+  "type": "object",
+  "required": [
+    "$schema",
+    "serviceId",
+    "name",
+    "description",
+    "cycleStages"
+  ],
+  "properties": {
+    "serviceId": {
+      "type": "string",
+      "description": "Unique identifier for the AI service"
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable name of the AI service"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed description of the AI service"
+    },
+    "cycleStages": {
+      "type": "object",
+      "description": "Environmental-impact configuration for each stage",
+      "required": [
+        "businessUseCaseGeneration",
+        "dataHandling",
+        "modelArchitectureExploration",
+        "modelTraining",
+        "modelOperation",
+        "modelEndOfLife",
+        "materialExtraction",
+        "hardwareManufacturing",
+        "hardwareTransport",
+        "AISystemInstallation"
+      ],
+      "properties": {
+        "businessUseCaseGeneration":       { "$ref": "#/$defs/impactConfig" },
+        "dataHandling":                   { "$ref": "#/$defs/impactConfig" },
+        "modelArchitectureExploration":   { "$ref": "#/$defs/impactConfig" },
+        "modelTraining":                  { "$ref": "#/$defs/impactConfig" },
+        "modelOperation":                 { "$ref": "#/$defs/impactConfig" },
+        "modelEndOfLife":                 { "$ref": "#/$defs/impactConfig" },
+        "materialExtraction":             { "$ref": "#/$defs/impactConfig" },
+        "hardwareManufacturing":          { "$ref": "#/$defs/impactConfig" },
+        "hardwareTransport":              { "$ref": "#/$defs/impactConfig" },
+        "AISystemInstallation":           { "$ref": "#/$defs/impactConfig" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "impactConfig": {
+      "oneOf": [
+        { "$ref": "#/$defs/none" },
+        { "$ref": "#/$defs/approximation" },
+        { "$ref": "#/$defs/dynamic" }
+      ]
+    },
+    "none": {
+      "type": "object",
+      "properties": {
+        "impactCalculationMode": { "const": "none" }
+      },
+      "required": ["impactCalculationMode"],
+      "additionalProperties": false
+    },
+    "approximation": {
+      "type": "object",
+      "properties": {
+        "impactCalculationMode": { "const": "approximation" },
+        "co2EqInKg": { "type": "number", "minimum": 0 }
+      },
+      "required": ["impactCalculationMode", "co2EqInKg"],
+      "additionalProperties": false
+    },
+    "dynamic": {
+      "type": "object",
+      "properties": {
+        "impactCalculationMode": { "const": "dynamic" },
+        "httpApiUrl": { "type": "string", "format": "uri" },
+        "token": { "type": "string", "minLength": 1 }
+      },
+      "required": ["impactCalculationMode", "httpApiUrl", "token"],
+      "additionalProperties": false
+    }
+  }
+}

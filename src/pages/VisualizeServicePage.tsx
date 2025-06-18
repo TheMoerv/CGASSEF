@@ -1,4 +1,12 @@
-// src/pages/VisualizeServicePage.tsx
+/**
+ * @file src/pages/VisualizeServicePage.tsx
+ * @description Implements the "Visual Impact of AI Service" core function of the CGASSEF prototype.
+ * This page allows users to upload a completed AI service configuration JSON file and view
+ * a dashboard of visualizations. It processes the impact data to generate charts that
+ * break down CO₂ emissions by lifecycle stage and by category (operational vs. embodied).
+ * @author Marwin Ahnfeldt
+ */
+
 import React, { useState, useEffect, useRef } from 'react';
 import type { AIServiceLifecycleImpact, LifecycleStageKey, ImpactConfig, ApproximationConfig } from '@/types/aiService';
 import { lifecycleStageKeys } from '@/types/aiService';
@@ -32,7 +40,16 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
-// Helper for CO2 value extraction
+// --- Helper Functions & Constants ---
+
+/**
+ * Extracts the CO₂ value from a stage's configuration, correctly handling different impact modes.
+ * If the mode is 'dynamic', it uses the current simulated value from the component's state.
+ * @param {LifecycleStageKey} stageKey - The key of the stage.
+ * @param {ImpactConfig} config - The impact configuration for that stage.
+ * @param {Partial<Record<LifecycleStageKey, number>>} currentDynamicValues - The current state of simulated dynamic values.
+ * @returns {number} The CO₂ value in kg.
+ */
 const getCO2Value = (
     stageKey: LifecycleStageKey,
     config: ImpactConfig,
@@ -42,12 +59,16 @@ const getCO2Value = (
         return (config as ApproximationConfig).co2EqInKg;
     }
     if (config.impactCalculationMode === 'dynamic') {
+      // Return the simulated value for dynamic stages.
         return currentDynamicValues[stageKey] || 0;
     }
     return 0;
 };
 
-// Define keys for operational and embodied emissions
+/**
+ * Defines the keys for categorizing emissions into 'Operational' (software) and 'Embodied' (hardware).
+ * This is used for generating the "Operational vs. Embodied" pie chart.
+ */
 const softwareCycleKeys: LifecycleStageKey[] = [
   'businessUseCaseGeneration', 'dataHandling', 'modelArchitectureExploration',
   'modelTraining', 'modelOperation', 'modelEndOfLife',
@@ -56,37 +77,50 @@ const hardwareCycleKeys: LifecycleStageKey[] = [
   'materialExtraction', 'hardwareManufacturing', 'hardwareTransport', 'AISystemInstallation',
 ];
 
+/**
+ * The `VisualizeServicePage` component renders the main dashboard for impact data visualization.
+ * It manages the entire lifecycle of this feature, from file upload to data processing and chart rendering.
+ */
 export function VisualizeServicePage() {
+  // State for the loaded and parsed service data from the JSON file
   const [serviceData, setServiceData] = useState<AIServiceLifecycleImpact | null>(null);
+  // State for storing and displaying any errors that occur during file processing
   const [error, setError] = useState<string | null>(null);
+  // Ref to programmatically trigger the hidden file input element
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // --- State for Chart Data and Configuration ---
   const [detailedStageData, setDetailedStageData] = useState<Array<{ stage: LifecycleStageKey; co2: number; fill: string }>>([]);
   const [detailedStageChartConfig, setDetailedStageChartConfig] = useState<ChartConfig>({});
 
   const [opVsEmbChartData, setOpVsEmbChartData] = useState<Array<{ name: string; value: number; fill: string }>>([]);
   const [opVsEmbChartConfig, setOpVsEmbChartConfig] = useState<ChartConfig>({});
-
+  // State to hold simulated values for stages with 'dynamic' impact mode
   const [dynamicStageValues, setDynamicStageValues] = useState<Partial<Record<LifecycleStageKey, number>>>({});
 
-  // Effect for simulating dynamic value updates
+  /**
+   * Effect to simulate live data updates for any stages marked as 'dynamic'.
+   * This demonstrates the tool's capability to handle live data feeds, as envisioned in the conceptual framework.
+   */
   useEffect(() => {
     if (!serviceData) {
       setDynamicStageValues({});
       return;
     }
+    // Initialize dynamic values with a random starting point
     const initialValues: Partial<Record<LifecycleStageKey, number>> = {};
     let hasDynamicStages = false;
     lifecycleStageKeys.forEach(stageKey => {
       const config = serviceData.cycleStages[stageKey];
       if (config && config.impactCalculationMode === 'dynamic') {
-        initialValues[stageKey] = Math.random() * 5 + 1;
+        initialValues[stageKey] = Math.random() * 5 + 1; // Initial random value
         hasDynamicStages = true;
       }
     });
     setDynamicStageValues(initialValues);
 
-    if (!hasDynamicStages) return;
+    if (!hasDynamicStages) return; // Don't start interval if no dynamic stages exist
+    // Set up an interval to periodically update the dynamic values, creating a "live" chart effect
     const intervalId = setInterval(() => {
       setDynamicStageValues(prev => {
         const newValues = { ...prev };
@@ -98,13 +132,18 @@ export function VisualizeServicePage() {
         });
         return newValues;
       });
-    }, 5000);
+    }, 5000); // Update every 5 second
+    // Cleanup function to clear the interval when the component unmounts or serviceData changes
     return () => clearInterval(intervalId);
   }, [serviceData]);
 
-  // Effect for preparing all chart data
+  /**
+   * The main data processing effect. It runs whenever the service data or dynamic values change,
+   * recalculating and preparing all the necessary data structures for the charts.
+   */
   useEffect(() => {
     if (!serviceData) {
+      // Clear all chart data if no service data is loaded
       setDetailedStageData([]);
       setDetailedStageChartConfig({});
       setOpVsEmbChartData([]);
@@ -112,10 +151,10 @@ export function VisualizeServicePage() {
       return;
     }
 
-    // 1. Prepare data for Detailed CO2 by Stage (Cycling Colors)
+    /// 1. Prepare data for the "CO₂ by Stage" (Detailed) Pie and Bar Charts
     const newDetailedConfig: ChartConfig = { co2: { label: "CO₂ (kg)" } };
     const newDetailedData: Array<{ stage: LifecycleStageKey; co2: number; fill: string }> = [];
-    let detailedChartColorIndex = 1; // For cycling through --chart-1 to --chart-10
+    let detailedChartColorIndex = 1; 
     const MAX_FIXED_CHART_COLORS = 10;
 
     lifecycleStageKeys.forEach(stageKey => {
@@ -135,7 +174,7 @@ export function VisualizeServicePage() {
     setDetailedStageData(newDetailedData);
     setDetailedStageChartConfig(newDetailedConfig);
 
-    // 2. Prepare data for Operational vs. Embodied Emissions
+    // 2. Prepare data for the "Operational vs. Embodied" Pie Chart
     let operationalEmissions = 0;
     softwareCycleKeys.forEach(stageKey => {
       const config = serviceData.cycleStages[stageKey];
@@ -167,6 +206,10 @@ export function VisualizeServicePage() {
 
   }, [serviceData, dynamicStageValues]);
 
+  /**
+   * Handles the file selection event. Reads the file, parses it as JSON, performs basic
+   * validation, and updates the component's state with the data or an error message.
+   */
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     setError(null); setServiceData(null);
@@ -174,6 +217,7 @@ export function VisualizeServicePage() {
       try {
         const rawJson = await file.text();
         const parsedConfig = JSON.parse(rawJson) as AIServiceLifecycleImpact;
+        // Basic validation to ensure the file is in the expected format
         if (!parsedConfig.serviceId || !parsedConfig.name || !parsedConfig.cycleStages) {
             throw new Error("Invalid or incomplete service configuration file.");
         }
@@ -190,6 +234,7 @@ export function VisualizeServicePage() {
 
   const handleUploadClick = () => fileInputRef.current?.click();
 
+  // A custom tooltip component for Recharts to ensure a consistent look and feel
   const CustomTooltipContent = (props: TooltipProps<number, string>) => {
     const { active, payload, label: nameKeyFromProps } = props;
     if (active && payload && payload.length) {
@@ -218,6 +263,7 @@ export function VisualizeServicePage() {
     return null;
   };
 
+  // Calculates the total CO₂ emissions on every render to ensure it's always current
   const totalCO2 = lifecycleStageKeys.reduce((sum, stageKey) => {
     if (serviceData?.cycleStages[stageKey]) {
       return sum + getCO2Value(stageKey, serviceData.cycleStages[stageKey], dynamicStageValues);
@@ -227,6 +273,7 @@ export function VisualizeServicePage() {
 
   return (
     <div className="container mx-auto py-8 px-4 space-y-8">
+       {/* --- Upload Card --- */}
       <Card className="shadow-lg">
         <CardHeader>
           <CardTitle className="text-2xl">AI Service CO₂ Dashboard</CardTitle>
@@ -243,6 +290,7 @@ export function VisualizeServicePage() {
         </CardContent>
       </Card>
 
+       {/* --- Data Display Section (conditionally rendered after data is loaded) --- */}
       {serviceData && (
         <Card className="shadow-lg">
           <CardHeader>
@@ -252,7 +300,8 @@ export function VisualizeServicePage() {
           </CardHeader>
         </Card>
       )}
-
+      
+      {/* Charts Grid */}
       {serviceData && (detailedStageData.length > 0 || opVsEmbChartData.length > 0) && (
         <div className="grid md:grid-cols-2 gap-6 lg:gap-8">
           {/* CO2 BY STAGE (DETAILED) PIE CHART */}

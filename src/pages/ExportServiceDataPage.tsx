@@ -1,7 +1,15 @@
-// src/pages/ExportServiceDataPage.tsx
+/**
+ * @file src/pages/ExportServiceDataPage.tsx
+ * @description Implements the fourth core function of the CGASSEF prototype: exporting AI service
+ * impact data to a CSV file. This enables the reuse of the collected data in external
+ * tools like spreadsheet programs or business intelligence solutions. The page facilitates uploading a JSON file and transforming it into a
+ * structured, tabular CSV format.
+ * @author Marwin Ahnfeldt
+ */
+
 import React, { useState, useRef } from 'react';
 import type { AIServiceLifecycleImpact, LifecycleStageKey, ImpactConfig, ApproximationConfig, DynamicConfig } from '@/types/aiService';
-import { STAGE_LABELS } from '@/constants/lifecycleStages'; // Assuming lifecycleStageKeys is exported
+import { STAGE_LABELS } from '@/constants/lifecycleStages'; 
 import  { lifecycleStageKeys } from '@/types/aiService';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -11,6 +19,19 @@ import Papa from 'papaparse'; // For CSV generation
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
+/**
+ * Defines the structure of a single row in the output CSV file. This flattens the hierarchical JSON data into a tabular format, where each row
+ * represents a single life cycle stage.
+ *
+ * @property {string} serviceId - The ID of the service
+ * @property {string} serviceName - The name of the service
+ * @property {string} serviceDescription - The description of the service
+ * @property {LifecycleStageKey} lifecycleStageKey - The programmatic key of the stage
+ * @property {string} lifecycleStageLabel - The human-readable label of the stage
+ * @property {ImpactConfig['impactCalculationMode']} impactCalculationMode - The mode used for this stage
+ * @property {number | string} [co2EqInKg] - The CO₂ value, or a placeholder string for dynamic mode
+ * @property {string} [httpApiUrl] - The API URL, if applicable for dynamic mode
+ */
 interface CsvRow {
     serviceId: string;
     serviceName: string;
@@ -18,17 +39,27 @@ interface CsvRow {
     lifecycleStageKey: LifecycleStageKey;
     lifecycleStageLabel: string;
     impactCalculationMode: ImpactConfig['impactCalculationMode'];
-    co2EqInKg?: number | string; // Can be number or string like "Dynamic (API)"
+    co2EqInKg?: number | string; 
     httpApiUrl?: string;
-    // Token is likely too sensitive for general CSV export, omitting by default
 }
 
+/**
+ * The `ExportServiceDataPage` component handles the UI and logic for the CSV export feature.
+ */
 export function ExportServiceDataPage() {
+  // State for the loaded and parsed service data from the JSON file
   const [serviceData, setServiceData] = useState<AIServiceLifecycleImpact | null>(null);
+  // State for the user-configurable export filename
   const [fileName, setFileName] = useState<string>('');
+  // State for storing and displaying any errors
   const [error, setError] = useState<string | null>(null);
+  // Ref to programmatically trigger the hidden file input
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  /**
+   * Handles the file selection event. Reads the file, parses it as JSON, validates it,
+   * and updates the component's state with the data and a default filename.
+   */
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     setError(null);
@@ -42,7 +73,8 @@ export function ExportServiceDataPage() {
             throw new Error("Invalid or incomplete service configuration file.");
         }
         setServiceData(parsedConfig);
-        setFileName(`${parsedConfig.serviceId}_impact_export.csv`); // Default filename
+        // Set a sensible default filename based on the service ID.
+        setFileName(`${parsedConfig.serviceId}_impact_export.csv`); 
       } catch (e: unknown) {
         console.error("Failed to load or parse config:", e);
         let errorMessage = "Invalid JSON format.";
@@ -53,21 +85,27 @@ export function ExportServiceDataPage() {
     }
   };
 
+  // Programmatically triggers the hidden file input
   const handleUploadClick = () => {
     fileInputRef.current?.click();
   };
 
+  /**
+   * Handles the core export logic. This function transforms the hierarchical JSON data
+   * into a flat array of `CsvRow` objects and then uses `papaparse` to convert this
+   * array into a CSV string for download.
+   */
   const handleExportToCsv = () => {
     if (!serviceData) {
       setError("No service data loaded to export.");
       return;
     }
 
+    // Transform the hierarchical data into a flat array of objects
     const csvData: CsvRow[] = [];
-
     lifecycleStageKeys.forEach(stageKey => {
         const config = serviceData.cycleStages[stageKey];
-        if (config) { // Should always be true if serviceData is valid
+        if (config) { 
             const row: CsvRow = {
                 serviceId: serviceData.serviceId,
                 serviceName: serviceData.name,
@@ -80,10 +118,9 @@ export function ExportServiceDataPage() {
             if (config.impactCalculationMode === 'approximation') {
                 row.co2EqInKg = (config as ApproximationConfig).co2EqInKg;
             } else if (config.impactCalculationMode === 'dynamic') {
-                row.co2EqInKg = 'Dynamic (API)'; // Placeholder for CSV
+                row.co2EqInKg = 'Dynamic (API)'; 
                 row.httpApiUrl = (config as DynamicConfig).httpApiUrl;
-                // Not exporting token for security
-            } else { // 'none'
+            } else { 
                 row.co2EqInKg = 0;
             }
             csvData.push(row);
@@ -94,8 +131,9 @@ export function ExportServiceDataPage() {
         setError("No impact data found in the service to export.");
         return;
     }
-
+    // Use papaparse to generate the CSV string from the array of objects
     const csvString = Papa.unparse(csvData);
+    // Standard client-side download logic
     const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -110,6 +148,7 @@ export function ExportServiceDataPage() {
 
   return (
     <div className="container mx-auto py-12 px-4 space-y-10">
+       {/* --- Upload Card --- */}
       <Card className="shadow-xl border-border/60">
         <CardHeader className="pb-4">
           <CardTitle className="text-3xl font-bold tracking-tight text-center">Export AI Service Impact Data</CardTitle>
@@ -141,6 +180,7 @@ export function ExportServiceDataPage() {
         </CardContent>
       </Card>
 
+      {/* --- Export Options Card (conditionally rendered) --- */}      
       {serviceData && (
         <Card className="shadow-xl border-border/60">
           <CardHeader>

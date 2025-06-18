@@ -1,21 +1,43 @@
+/**
+ * @file src/pages/CreateServicePage.tsx
+ * @description This file implements the "Create/Edit AI-Related Impacts" core function of the
+ * CGASSEF prototype. It provides a multi-step navigation interface for users to either
+ * create a new AI service impact configuration or load and modify an existing one.
+ *
+ * It utilizes a combination of 'useReducer' and 'useContext' for robust state management
+ * across the entire multi-step form process, centralizing all business logic and state
+ * transitions for creating or editing an 'AIServiceLifecycleImpact' object.
+ * @author Marwin Ahnfeldt
+ */
+
 import React, { createContext, useContext, useReducer} from 'react';
 import type { ReactNode } from 'react';
 import type { AIServiceLifecycleImpact, ImpactConfig, LifecycleStageKey } from '@/types/aiService';
 import { createDefaultCycleStages} from '@/types/aiService';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+// Import the components for each step of the wizard
 import { Step0_LoadOrNew } from './createServiceSteps/step0_LoadOrNew';
 import { Step1_MetadataForm } from './createServiceSteps/Step1_MetadataForm';
 import { Step2_HardwareStagesForm } from './createServiceSteps/Step2_HardwareStagesForm';
 import { Step3_SoftwareStagesForm } from './createServiceSteps/Step3_SoftwareStagesForm';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Step4_ExportView } from './createServiceSteps/Step4_ExportView';
-// Import step components once you create them
-// import { Step0_LoadOrNew } from './steps/Step0_LoadOrNew';
-// import { Step1_MetadataForm } from './steps/Step1_MetadataForm';
-// ...
 
-// The rest of your file remains the same:
+// --- STATE MANAGEMENT (Reducer & Context) ---
 
+
+/**
+ * Defines the shape of the state for the entire creation/editing navigation structure
+ *
+ * @property {number} currentStep - The index of the currently active step in the navigation structure
+ * @property {string} serviceId - The unique ID of the AI service
+ * @property {string} name - The human-readable name of the AI service
+ * @property {string} description - A detailed description of the service
+ * @property {boolean | null} includeHardware - User's choice to include hardware lifecycle stages. `null` before selection
+ * @property {AIServiceLifecycleImpact['cycleStages']} cycleStages - The core object holding impact data for all stages
+ * @property {boolean} isEditing - A flag to indicate if the user is editing an existing record
+ * @property {string} defaultFilename - A generated filename for the export view
+ */
 type State = {
   currentStep: number;
   serviceId: string;
@@ -27,31 +49,40 @@ type State = {
   defaultFilename: string;
 };
 
+// Defines all possible actions that can be dispatched to update the state.
 type Action =
-  | { type: 'SET_STEP'; payload: number }
-  | { type: 'LOAD_CONFIG'; payload: AIServiceLifecycleImpact } // This usage is fine
-  | { type: 'UPDATE_METADATA'; payload: { serviceId?: string; name?: string; description?: string } }
-  | { type: 'SET_INCLUDE_HARDWARE'; payload: boolean }
-  | { type: 'UPDATE_CYCLE_STAGE'; payload: { stageKey: LifecycleStageKey; config: ImpactConfig } } // Fine
-  | { type: 'RESET_FORM' }
-  | { type: 'SET_DEFAULT_FILENAME'; payload: string };
+  | { type: 'SET_STEP'; payload: number } // Navigates to a specific step
+  | { type: 'LOAD_CONFIG'; payload: AIServiceLifecycleImpact } // Fills the form input dialog with data from a loaded file
+  | { type: 'UPDATE_METADATA'; payload: { serviceId?: string; name?: string; description?: string } } // Updates service metadata
+  | { type: 'SET_INCLUDE_HARDWARE'; payload: boolean } // Sets the user's choice on including hardware stage
+  | { type: 'UPDATE_CYCLE_STAGE'; payload: { stageKey: LifecycleStageKey; config: ImpactConfig } } // Updates impact data for a life cycle stage
+  | { type: 'RESET_FORM' } // Resets form to initial state
+  | { type: 'SET_DEFAULT_FILENAME'; payload: string }; // Sets the default filename for the export step
 
-
+// Sets initial state of navigation dialog structure
 const initialState: State = {
   currentStep: 0,
   serviceId: '',
   name: '',
   description: '',
   includeHardware: null,
-  cycleStages: createDefaultCycleStages(), // createDefaultCycleStages is a value, imported normally
+  cycleStages: createDefaultCycleStages(), 
   isEditing: false,
   defaultFilename: '',
 };
 
+/**
+ * The reducer function that handles all state transitions in the navigation structure.
+ * It takes the current state and an action, and returns the new state.
+ * @param {State} state - The current state
+ * @param {Action} action - The action to be processed
+ * @returns {State} The new state after applying the action
+ */
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case 'SET_STEP':
       return { ...state, currentStep: action.payload };
+    // When a config is loaded, fill in all fields, mark as editing, and move to Step 1
     case 'LOAD_CONFIG':
       return {
         ...state,
@@ -59,6 +90,7 @@ function reducer(state: State, action: Action): State {
         name: action.payload.name,
         description: action.payload.description,
         cycleStages: action.payload.cycleStages,
+        // Determines if hardware stages were included in loaded file
         includeHardware: Object.keys(action.payload.cycleStages).some(key =>
           ['materialExtraction', 'hardwareManufacturing', 'hardwareTransport', 'AISystemInstallation'].includes(key) &&
           action.payload.cycleStages[key as LifecycleStageKey]?.impactCalculationMode !== 'none'
@@ -78,20 +110,23 @@ function reducer(state: State, action: Action): State {
           [action.payload.stageKey]: action.payload.config,
         },
       };
+    // Reset all fields but re-initialize cycleStages to avoid deprecated references.
     case 'RESET_FORM':
         return {...initialState, cycleStages: createDefaultCycleStages()};
     case 'SET_DEFAULT_FILENAME':
         return { ...state, defaultFilename: action.payload };
     default:
-      // It's good practice to explicitly return state or throw an error for unhandled actions
-      // if your action type is a discriminated union and all cases should be handled.
-      // However, for this reducer, simply returning state is fine.
       return state;
   }
 }
 
 const CreateServiceContext = createContext<{ state: State; dispatch: React.Dispatch<Action> } | undefined>(undefined);
 
+/**
+ * A custom helper function to easily access the navigation step state and dispatch function from any child component.
+ * Throws an error if used outside of a 'CreateServiceProvider', ensuring proper usage.
+ * @returns The context value: { state, dispatch }
+ */
 export const useCreateServiceContext = () => {
   const context = useContext(CreateServiceContext);
   if (!context) {
@@ -104,6 +139,10 @@ interface CreateServiceProviderProps {
   children: ReactNode; // ReactNode is used as a type here
 }
 
+/**
+ * The provider component that wraps the navigation structure dialog UI. It initializes the 'useReducer' hook
+ * and makes the state and dispatch function available via the 'CreateServiceContext'.
+ */
 export const CreateServiceProvider: React.FC<CreateServiceProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   return (
@@ -113,7 +152,11 @@ export const CreateServiceProvider: React.FC<CreateServiceProviderProps> = ({ ch
   );
 };
 
+// --- UI COMPONENTS ---
 
+/**
+ * The main page component for the Create/Edit feature for wrap the navigation dialog UI with the state provider.
+ */
 export function CreateServicePage() {
   return (
     <CreateServiceProvider>
@@ -122,9 +165,13 @@ export function CreateServicePage() {
   );
 }
 
+/**
+ * Renders the navigation dialogs (wizard) UI, including the current step's component and the navigation buttons.
+ * It consumes the context to access state and control navigation logic.
+ */
 function CreateServiceWizard() {
     const { state, dispatch } = useCreateServiceContext();
-
+     // Advances to the next step, intelligently skipping the hardware step if not applicable.
     const nextStep = () => {
         // Skip step 2 if includeHardware is false and we are currently on step 1
         if (state.currentStep === 1 && !state.includeHardware) {
@@ -133,7 +180,7 @@ function CreateServiceWizard() {
             dispatch({ type: 'SET_STEP', payload: state.currentStep + 1 });
         }
     };
-
+    // Moves to the previous step, also skipping the hardware step if needed.
     const prevStep = () => {
         // Skip step 2 if includeHardware is false and we are currently on step 3
         if (state.currentStep === 3 && !state.includeHardware) {

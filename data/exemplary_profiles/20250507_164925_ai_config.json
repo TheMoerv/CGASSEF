@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "serviceId": "2",
+  "name": "Internal Knowledge Chatbot",
+  "description": "",
+  "cycleStages": {
+    "businessUseCaseGeneration": {
+      "impactCalculationMode": "approximation",
+      "co2EqInKg": 25.0
+    },
+    "dataHandling": {
+      "impactCalculationMode": "approximation",
+      "co2EqInKg": 75.0
+    },
+    "modelArchitectureExploration": {
+      "impactCalculationMode": "approximation",
+      "co2EqInKg": 900.0
+    },
+    "modelTraining": {
+      "impactCalculationMode": "approximation",
+      "co2EqInKg": 730.0
+    },
+    "modelOperation": {
+      "impactCalculationMode": "approximation",
+      "co2EqInKg": 2700.0
+    },
+    "modelEndOfLife": {
+      "impactCalculationMode": "none"
+    },
+    "materialExtraction": {
+      "impactCalculationMode": "approximation",
+      "co2EqInKg": 12.0
+    },
+    "hardwareManufacturing": {
+      "impactCalculationMode": "approximation",
+      "co2EqInKg": 370.0
+    },
+    "hardwareTransport": {
+      "impactCalculationMode": "approximation",
+      "co2EqInKg": 40.0
+    },
+    "AISystemInstallation": {
+      "impactCalculationMode": "approximation",
+      "co2EqInKg": 18.0
+    }
+  }
+}
