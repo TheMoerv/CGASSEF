@@ -7,7 +7,7 @@
  */
 
 // Import the representative image from the assets folder.
-import heroImageSrc from '@/assets/cgsaem_visualization.png'; 
+import heroImageSrc from '@/assets/cgsassef_visualization.png'; 
 // Import a UI icon for visual enhancement of the features list.
 import { CheckCircle } from 'lucide-react'; // For bullet point icons
 
