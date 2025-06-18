@@ -8,7 +8,7 @@
 ---
 
 <p align="center">
-  <img src="src/assets/cgsaem_visualization.png" width="800" alt="">
+  <img src="src/assets/cgassef_visualization.png" width="800" alt="">
 </p>
 
 ## About The Project
@@ -64,20 +64,9 @@ This prototype is built with a modern web technology stack:
 
 The codebase is organized via the following directory structure:
 
-data/
-├── profiles/        # Exemplary AI service impact profiles for testing
-├── schema/          # CGASSEF JSON schema 
-
-src/
-├── assets/          # Static assets like images and icons
-├── components/      # Reusable React components (e.g., AppLayout.tsx, LifecycleStageInput.tsx)
-├── constants/       # Application-wide constants (e.g., lifecycleStages.ts)
-├── pages/           # Top-level components for each view/route
-│   └── createServiceSteps/ # Components for the multi-step "Create" wizard / navigation dialgue
-├── types/           # Core TypeScript type definitions (e.g., aiService.ts)
-├── App.tsx          # Main application component with routing
-└── main.tsx         # Application entry point
-
+<p align="center">
+  <img src="src/assets/cgassef_architecture.png" width="800" alt="">
+</p>
 
 ## Setup and Running Locally
 
