@@ -17,6 +17,15 @@ This repository contains the source code for the **Comprehensive (Generative) AI
 
 The tool is a concrete implementation of the "Tool Approach" derived from the Design Science Research Process (DSRP) methodology by Peffers et al. (2007). It translates the conceptual CGASSEF framework into a concreate web tool for managing, assessing, and visualizing the environmental sustainability impact of AI services within an organizational context.
 
+## Acknowledgements
+
+This project was developed as part of the Master's thesis *"An Approach for Assessing and Evaluating Sustainability of Generative AI Applications throughout their Life Cycle"* at the Chair of Business Information Systems, especially AI-based Application Systems,  at the University of Potsdam under the supervision of **Prof. Dr.-Ing. Marcus Grum** and **Marcel Rojahn**.
+
+## License
+
+Distributed under the **MIT License**.  
+See the [LICENSE](./LICENSE) file for more information.
+
 ## The Core Data Model
 
 The entire prototype is built around a central, well-defined data structure represented in JSON format. This `AIServiceLifecycleImpact` object serves as the single source of truth for an AI service's impact profile.
